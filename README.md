@@ -1,4 +1,4 @@
-# worktree.nvim
+# neotrees.nvim
 
 A zero-dependency Neovim plugin for managing git worktrees through a floating window interface.
 
@@ -15,9 +15,9 @@ Uses `vim.system()` for all git operations. No plenary.nvim, no telescope.nvim r
 
 ```lua
 {
-  "gsilvapt/worktree.nvim",
+  "gsilvapt/neotrees.nvim",
   keys = {
-    { "<leader>gw", function() require("worktree").open() end, desc = "Git worktrees" },
+    { "<leader>gw", function() require("neotrees").open() end, desc = "Git worktrees" },
   },
   opts = {},
 }
@@ -27,10 +27,10 @@ Uses `vim.system()` for all git operations. No plenary.nvim, no telescope.nvim r
 
 ```lua
 use {
-  "gsilvapt/worktree.nvim",
+  "gsilvapt/neotrees.nvim",
   config = function()
-    require("worktree").setup()
-    vim.keymap.set("n", "<leader>gw", function() require("worktree").open() end)
+    require("neotrees").setup()
+    vim.keymap.set("n", "<leader>gw", function() require("neotrees").open() end)
   end,
 }
 ```
@@ -40,12 +40,12 @@ use {
 Clone the repository and add it to your runtimepath:
 
 ```sh
-git clone https://github.com/gsilvapt/worktree.nvim ~/.local/share/nvim/site/pack/plugins/start/worktree.nvim
+git clone https://github.com/gsilvapt/neotrees.nvim ~/.local/share/nvim/site/pack/plugins/start/neotrees.nvim
 ```
 
 ## Usage
 
-Open the worktree manager with `:Neotree` or your configured keymap. A floating window displays all worktrees in the current repository:
+Open the worktree manager with `:Neotrees` or your configured keymap. A floating window displays all worktrees in the current repository:
 
 ```
  Git Worktrees
@@ -71,17 +71,17 @@ Open the worktree manager with `:Neotree` or your configured keymap. A floating 
 
 | Command | Description |
 |---|---|
-| `:Neotree` | Open the worktree manager |
-| `:NeotreeAdd <branch> [path]` | Create a worktree (supports tab-completion) |
-| `:NeotreeDelete <path>` | Delete a worktree (supports tab-completion) |
-| `:NeotreeLog` | Open the debug log buffer |
+| `:Neotrees` | Open the worktree manager |
+| `:NeotreesAdd <branch> [path]` | Create a worktree (supports tab-completion) |
+| `:NeotreesDelete <path>` | Delete a worktree (supports tab-completion) |
+| `:NeotreesLog` | Open the debug log buffer |
 
 ## Configuration
 
-All options are optional. Pass them to `setup()` or set `vim.g.worktree` before the plugin loads.
+All options are optional. Pass them to `setup()` or set `vim.g.neotrees` before the plugin loads.
 
 ```lua
-require("worktree").setup({
+require("neotrees").setup({
   -- Derive worktree filesystem path from branch name and repo name.
   -- Default: "feature/foo" in repo "myproject" -> "../myproject-foo"
   path_from_branch = function(branch, repo_name)
@@ -146,19 +146,19 @@ opts = {
 ## Programmatic API
 
 ```lua
-local wt = require("worktree")
+local wt = require("neotrees")
 
 wt.open()                          -- Open the floating window
 wt.create("feature/foo")           -- Create worktree (path auto-derived)
 wt.create("fix/bar", "../bar")     -- Create worktree at specific path
 wt.delete("/home/user/project-foo") -- Delete a worktree
 wt.switch("/home/user/project-foo") -- Switch to a worktree
-wt.list()                          -- Returns a list of WorktreeEntry tables
+wt.list()                          -- Returns a list of NeotreesEntry tables
 ```
 
 ## Debug mode
 
-Set `debug = true` to log every git command, its exit code, stdout, and stderr. View the log with `:NeotreeLog`:
+Set `debug = true` to log every git command, its exit code, stdout, and stderr. View the log with `:NeotreesLog`:
 
 ```
 [12:34:56] CMD: git worktree list --porcelain

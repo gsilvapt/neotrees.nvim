@@ -1,4 +1,4 @@
-local log = require("worktree.log")
+local log = require("neotrees.log")
 
 local M = {}
 
@@ -8,7 +8,7 @@ local M = {}
 ---@field stderr string Standard error
 ---@field code integer Exit code
 
----@class WorktreeEntry
+---@class NeotreesEntry
 ---@field path string Absolute path to the worktree
 ---@field branch string Branch name (or "HEAD detached" for detached)
 ---@field head string Short commit hash
@@ -63,7 +63,7 @@ end
 
 --- Parse `git worktree list --porcelain` output into structured entries.
 ---@param raw string The raw porcelain output
----@return WorktreeEntry[]
+---@return NeotreesEntry[]
 local function parse_porcelain(raw)
   local entries = {}
   local current = {}
@@ -105,7 +105,7 @@ local function parse_porcelain(raw)
 end
 
 --- List all worktrees.
----@return WorktreeEntry[]
+---@return NeotreesEntry[]
 function M.list()
   local result = M.exec({ "worktree", "list", "--porcelain" })
   if not result.ok then

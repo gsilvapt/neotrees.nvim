@@ -1,23 +1,23 @@
-if vim.g.loaded_worktree then
+if vim.g.loaded_neotrees then
   return
 end
-vim.g.loaded_worktree = true
+vim.g.loaded_neotrees = true
 
-vim.api.nvim_create_user_command("Neotree", function()
-  require("worktree").open()
-end, { desc = "Open the worktree manager" })
+vim.api.nvim_create_user_command("Neotrees", function()
+  require("neotrees").open()
+end, { desc = "Open the neotrees manager" })
 
-vim.api.nvim_create_user_command("NeotreeAdd", function(opts)
+vim.api.nvim_create_user_command("NeotreesAdd", function(opts)
   local args = vim.split(opts.args, "%s+", { trimempty = true })
   local branch = args[1]
   local path = args[2]
 
   if not branch then
-    vim.notify("worktree: branch name is required. Usage: :NeotreeAdd <branch> [path]", vim.log.levels.ERROR)
+    vim.notify("neotrees: branch name is required. Usage: :NeotreesAdd <branch> [path]", vim.log.levels.ERROR)
     return
   end
 
-  require("worktree").create(branch, path)
+  require("neotrees").create(branch, path)
 end, {
   nargs = "+",
   desc = "Add a new git worktree",
@@ -44,15 +44,15 @@ end, {
   end,
 })
 
-vim.api.nvim_create_user_command("NeotreeDelete", function(opts)
+vim.api.nvim_create_user_command("NeotreesDelete", function(opts)
   local path = opts.args
 
   if not path or path == "" then
-    vim.notify("worktree: path is required. Usage: :NeotreeDelete <path>", vim.log.levels.ERROR)
+    vim.notify("neotrees: path is required. Usage: :NeotreesDelete <path>", vim.log.levels.ERROR)
     return
   end
 
-  require("worktree").delete(path)
+  require("neotrees").delete(path)
 end, {
   nargs = 1,
   desc = "Delete a git worktree",
@@ -77,6 +77,6 @@ end, {
   end,
 })
 
-vim.api.nvim_create_user_command("NeotreeLog", function()
-  require("worktree.log").open()
-end, { desc = "Open the worktree debug log" })
+vim.api.nvim_create_user_command("NeotreesLog", function()
+  require("neotrees.log").open()
+end, { desc = "Open the neotrees debug log" })

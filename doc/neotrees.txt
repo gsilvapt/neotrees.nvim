@@ -1,41 +1,41 @@
-*worktree.txt*  Git worktree manager for Neovim
+*neotrees.txt*  Git worktree manager for Neovim
 
 Author: gsilvapt
 License: MIT
 
 ==============================================================================
-CONTENTS                                                    *worktree-contents*
+CONTENTS                                                    *neotrees-contents*
 
-  1. Introduction .......................... |worktree-introduction|
-  2. Requirements .......................... |worktree-requirements|
-  3. Setup ................................. |worktree-setup|
-  4. Configuration ......................... |worktree-config|
-  5. Commands .............................. |worktree-commands|
-  6. Keymaps ............................... |worktree-keymaps|
-  7. API ................................... |worktree-api|
-  8. Debug ................................. |worktree-debug|
+  1. Introduction .......................... |neotrees-introduction|
+  2. Requirements .......................... |neotrees-requirements|
+  3. Setup ................................. |neotrees-setup|
+  4. Configuration ......................... |neotrees-config|
+  5. Commands .............................. |neotrees-commands|
+  6. Keymaps ............................... |neotrees-keymaps|
+  7. API ................................... |neotrees-api|
+  8. Debug ................................. |neotrees-debug|
 
 ==============================================================================
-1. INTRODUCTION                                         *worktree-introduction*
+1. INTRODUCTION                                         *neotrees-introduction*
 
-worktree.nvim is a zero-dependency Neovim plugin for managing git worktrees
+neotrees.nvim is a zero-dependency Neovim plugin for managing git worktrees
 through a floating window interface. It uses `vim.system()` for all git
 operations and requires no external plugins.
 
 ==============================================================================
-2. REQUIREMENTS                                         *worktree-requirements*
+2. REQUIREMENTS                                         *neotrees-requirements*
 
 - Neovim >= 0.10 (for `vim.system()`)
 - git >= 2.17 (for worktree support)
 
 ==============================================================================
-3. SETUP                                                      *worktree-setup*
+3. SETUP                                                      *neotrees-setup*
 
 Using lazy.nvim: >lua
   {
-    "gsilvapt/worktree.nvim",
+    "gsilvapt/neotrees.nvim",
     keys = {
-      { "<leader>gw", function() require("worktree").open() end,
+      { "<leader>gw", function() require("neotrees").open() end,
         desc = "Git worktrees" },
     },
     opts = {},
@@ -43,10 +43,10 @@ Using lazy.nvim: >lua
 <
 
 The `setup()` call is optional. Configuration can also be set via
-`vim.g.worktree` before the plugin loads.
+`vim.g.neotrees` before the plugin loads.
 
 ==============================================================================
-4. CONFIGURATION                                             *worktree-config*
+4. CONFIGURATION                                             *neotrees-config*
 
 Default configuration: >lua
   {
@@ -86,7 +86,7 @@ Default configuration: >lua
   }
 <
 
-                                                     *worktree-after_create*
+                                                     *neotrees-after_create*
 after_create ~
 
 This option controls what runs in the new worktree directory after creation.
@@ -105,29 +105,29 @@ It accepts three forms:
 <
 
 ==============================================================================
-5. COMMANDS                                                *worktree-commands*
+5. COMMANDS                                                *neotrees-commands*
 
-                                                                     *:Neotree*
-:Neotree            Open the worktree manager floating window.
+                                                                    *:Neotrees*
+:Neotrees           Open the worktree manager floating window.
 
-                                                                  *:NeotreeAdd*
-:NeotreeAdd {branch} [{path}]
+                                                                 *:NeotreesAdd*
+:NeotreesAdd {branch} [{path}]
                     Create a new worktree. If {path} is omitted, it is
                     derived from {branch} using `path_from_branch`.
                     Supports branch name tab-completion.
 
-                                                               *:NeotreeDelete*
-:NeotreeDelete {path}
+                                                              *:NeotreesDelete*
+:NeotreesDelete {path}
                     Delete a worktree at {path}. Removes the worktree
                     registration and all filesystem contents.
                     Supports worktree path tab-completion.
 
-                                                                  *:NeotreeLog*
-:NeotreeLog         Open the debug log buffer in a split. Shows all git
+                                                                 *:NeotreesLog*
+:NeotreesLog        Open the debug log buffer in a split. Shows all git
                     commands and their output when `debug = true`.
 
 ==============================================================================
-6. KEYMAPS                                                  *worktree-keymaps*
+6. KEYMAPS                                                  *neotrees-keymaps*
 
 Keymaps are active inside the floating worktree window:
 
@@ -141,51 +141,51 @@ Keymaps are active inside the floating worktree window:
 The cursor is constrained to worktree entry lines only.
 
 ==============================================================================
-7. API                                                          *worktree-api*
+7. API                                                          *neotrees-api*
 
-All functions are available via `require("worktree")`.
+All functions are available via `require("neotrees")`.
 
-                                                             *worktree.setup()*
-worktree.setup({opts})
+                                                             *neotrees.setup()*
+neotrees.setup({opts})
     Initialize the plugin with configuration options.
-    See |worktree-config| for available options.
+    See |neotrees-config| for available options.
 
-                                                              *worktree.open()*
-worktree.open()
+                                                              *neotrees.open()*
+neotrees.open()
     Open the floating worktree manager window.
 
-                                                            *worktree.create()*
-worktree.create({branch}, {path?})
+                                                            *neotrees.create()*
+neotrees.create({branch}, {path?})
     Create a new worktree programmatically.
     Parameters:
       {branch}  (string) Branch name (required)
       {path}    (string?) Filesystem path (auto-derived if nil)
 
-                                                            *worktree.delete()*
-worktree.delete({path})
+                                                            *neotrees.delete()*
+neotrees.delete({path})
     Delete a worktree by filesystem path.
     Parameters:
       {path}  (string) Worktree path (required)
 
-                                                            *worktree.switch()*
-worktree.switch({path})
+                                                            *neotrees.switch()*
+neotrees.switch({path})
     Switch to a worktree: changes cwd, wipes old buffers, opens new root.
     Parameters:
       {path}  (string) Worktree path (required)
 
-                                                              *worktree.list()*
-worktree.list()
+                                                              *neotrees.list()*
+neotrees.list()
     Returns a list of worktree entries.
     Returns: ~
-      WorktreeEntry[] ~
+      NeotreesEntry[] ~
         Each entry has: path (string), branch (string),
         head (string), bare (boolean).
 
 ==============================================================================
-8. DEBUG                                                      *worktree-debug*
+8. DEBUG                                                      *neotrees-debug*
 
 Set `debug = true` in configuration to enable logging of all git commands.
-Use `:NeotreeLog` to view the log buffer. Each entry shows:
+Use `:NeotreesLog` to view the log buffer. Each entry shows:
 
   [HH:MM:SS] CMD: git worktree list --porcelain
   [HH:MM:SS] EXIT: 0
