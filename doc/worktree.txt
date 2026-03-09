@@ -1,0 +1,198 @@
+*worktree.txt*  Git worktree manager for Neovim
+
+Author: gsilvapt
+License: MIT
+
+==============================================================================
+CONTENTS                                                    *worktree-contents*
+
+  1. Introduction .......................... |worktree-introduction|
+  2. Requirements .......................... |worktree-requirements|
+  3. Setup ................................. |worktree-setup|
+  4. Configuration ......................... |worktree-config|
+  5. Commands .............................. |worktree-commands|
+  6. Keymaps ............................... |worktree-keymaps|
+  7. API ................................... |worktree-api|
+  8. Debug ................................. |worktree-debug|
+
+==============================================================================
+1. INTRODUCTION                                         *worktree-introduction*
+
+worktree.nvim is a zero-dependency Neovim plugin for managing git worktrees
+through a floating window interface. It uses `vim.system()` for all git
+operations and requires no external plugins.
+
+==============================================================================
+2. REQUIREMENTS                                         *worktree-requirements*
+
+- Neovim >= 0.10 (for `vim.system()`)
+- git >= 2.17 (for worktree support)
+
+==============================================================================
+3. SETUP                                                      *worktree-setup*
+
+Using lazy.nvim: >lua
+  {
+    "gsilvapt/worktree.nvim",
+    keys = {
+      { "<leader>gw", function() require("worktree").open() end,
+        desc = "Git worktrees" },
+    },
+    opts = {},
+  }
+<
+
+The `setup()` call is optional. Configuration can also be set via
+`vim.g.worktree` before the plugin loads.
+
+==============================================================================
+4. CONFIGURATION                                             *worktree-config*
+
+Default configuration: >lua
+  {
+    -- Derive worktree filesystem path from branch name.
+    -- Default strips directory prefix: "feature/foo" -> "../foo"
+    path_from_branch = function(branch)
+      local name = branch:match("[^/]+$") or branch
+      return "../" .. name
+    end,
+
+    -- Commands to run after creating a worktree.
+    -- Can be: nil, a string, a list of strings, or a function(path, branch).
+    -- Examples:
+    --   "npm install"
+    --   { "go mod download", "make build" }
+    --   function(path, branch) vim.cmd("edit " .. path) end
+    after_create = nil,
+
+    -- Fetch from origin before creating a worktree.
+    fetch_before_create = true,
+
+    -- Branch to fetch/pull from before worktree creation.
+    base_branch = "main",
+
+    -- Prompt for a custom path instead of auto-deriving from branch name.
+    prompt_for_path = false,
+
+    -- Enable debug logging of all git commands and their output.
+    debug = false,
+
+    -- Floating window appearance.
+    ui = {
+      width = 0.6,   -- Relative to editor width (0.0-1.0)
+      height = 0.4,  -- Relative to editor height (0.0-1.0)
+      border = "rounded",
+    },
+  }
+<
+
+                                                     *worktree-after_create*
+after_create ~
+
+This option controls what runs in the new worktree directory after creation.
+It accepts three forms:
+
+  String:    Executed as a shell command via `sh -c`. >lua
+    after_create = "npm install"
+<
+  List:      Each string is executed sequentially as a shell command. >lua
+    after_create = { "go mod download", "make generate" }
+<
+  Function:  Called with `(path, branch)` arguments. >lua
+    after_create = function(path, branch)
+      vim.system({ "npm", "install" }, { cwd = path }):wait()
+    end
+<
+
+==============================================================================
+5. COMMANDS                                                *worktree-commands*
+
+                                                                     *:Neotree*
+:Neotree            Open the worktree manager floating window.
+
+                                                                  *:NeotreeAdd*
+:NeotreeAdd {branch} [{path}]
+                    Create a new worktree. If {path} is omitted, it is
+                    derived from {branch} using `path_from_branch`.
+                    Supports branch name tab-completion.
+
+                                                               *:NeotreeDelete*
+:NeotreeDelete {path}
+                    Delete a worktree at {path}. Removes the worktree
+                    registration and all filesystem contents.
+                    Supports worktree path tab-completion.
+
+                                                                  *:NeotreeLog*
+:NeotreeLog         Open the debug log buffer in a split. Shows all git
+                    commands and their output when `debug = true`.
+
+==============================================================================
+6. KEYMAPS                                                  *worktree-keymaps*
+
+Keymaps are active inside the floating worktree window:
+
+  Key         Action ~
+  `<CR>`, `l`   Switch to worktree under cursor
+  `a`           Add a new worktree (prompts for branch name)
+  `d`           Delete worktree under cursor (with confirmation)
+  `r`           Refresh the worktree list
+  `q`, `<Esc>`  Close the window
+
+The cursor is constrained to worktree entry lines only.
+
+==============================================================================
+7. API                                                          *worktree-api*
+
+All functions are available via `require("worktree")`.
+
+                                                             *worktree.setup()*
+worktree.setup({opts})
+    Initialize the plugin with configuration options.
+    See |worktree-config| for available options.
+
+                                                              *worktree.open()*
+worktree.open()
+    Open the floating worktree manager window.
+
+                                                            *worktree.create()*
+worktree.create({branch}, {path?})
+    Create a new worktree programmatically.
+    Parameters:
+      {branch}  (string) Branch name (required)
+      {path}    (string?) Filesystem path (auto-derived if nil)
+
+                                                            *worktree.delete()*
+worktree.delete({path})
+    Delete a worktree by filesystem path.
+    Parameters:
+      {path}  (string) Worktree path (required)
+
+                                                            *worktree.switch()*
+worktree.switch({path})
+    Switch to a worktree: changes cwd, wipes old buffers, opens new root.
+    Parameters:
+      {path}  (string) Worktree path (required)
+
+                                                              *worktree.list()*
+worktree.list()
+    Returns a list of worktree entries.
+    Returns: ~
+      WorktreeEntry[] ~
+        Each entry has: path (string), branch (string),
+        head (string), bare (boolean).
+
+==============================================================================
+8. DEBUG                                                      *worktree-debug*
+
+Set `debug = true` in configuration to enable logging of all git commands.
+Use `:NeotreeLog` to view the log buffer. Each entry shows:
+
+  [HH:MM:SS] CMD: git worktree list --porcelain
+  [HH:MM:SS] EXIT: 0
+  [HH:MM:SS] STDOUT: worktree /home/user/project ...
+
+The log is stored in a ring buffer (max 500 entries) and persists for the
+duration of the Neovim session.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
