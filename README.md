@@ -4,6 +4,8 @@ A zero-dependency Neovim plugin for managing git worktrees through a floating wi
 
 Uses `vim.system()` for all git operations. No plenary.nvim, no telescope.nvim required.
 
+<img width="1403" height="576" alt="Screenshot 2026-03-09 at 15 57 30" src="https://github.com/user-attachments/assets/8bb122f0-e79b-4070-a92c-99a2136ec298" />
+
 ## Requirements
 
 - Neovim >= 0.10
