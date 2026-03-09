@@ -82,11 +82,11 @@ All options are optional. Pass them to `setup()` or set `vim.g.worktree` before 
 
 ```lua
 require("worktree").setup({
-  -- Derive worktree filesystem path from branch name.
-  -- Default: "feature/foo" -> "../foo"
-  path_from_branch = function(branch)
+  -- Derive worktree filesystem path from branch name and repo name.
+  -- Default: "feature/foo" in repo "myproject" -> "../myproject-foo"
+  path_from_branch = function(branch, repo_name)
     local name = branch:match("[^/]+$") or branch
-    return "../" .. name
+    return "../" .. repo_name .. "-" .. name
   end,
 
   -- Commands to run after creating a worktree (in the new worktree directory).

@@ -50,11 +50,11 @@ The `setup()` call is optional. Configuration can also be set via
 
 Default configuration: >lua
   {
-    -- Derive worktree filesystem path from branch name.
-    -- Default strips directory prefix: "feature/foo" -> "../foo"
-    path_from_branch = function(branch)
+    -- Derive worktree filesystem path from branch name and repo name.
+    -- Default: "feature/foo" in repo "myproject" -> "../myproject-foo"
+    path_from_branch = function(branch, repo_name)
       local name = branch:match("[^/]+$") or branch
-      return "../" .. name
+      return "../" .. repo_name .. "-" .. name
     end,
 
     -- Commands to run after creating a worktree.

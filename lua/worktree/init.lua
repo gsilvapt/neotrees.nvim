@@ -5,6 +5,18 @@ local log = require("worktree.log")
 
 local M = {}
 
+--- Get the repository directory name (e.g., "worktrees.nvim" from "/home/user/worktrees.nvim").
+--- Uses the first worktree's path (the main checkout) as the canonical repo name.
+---@return string repo_name
+local function repo_name()
+  local toplevel = git.toplevel()
+  if toplevel then
+    return vim.fn.fnamemodify(toplevel, ":t")
+  end
+  -- Fallback: use cwd basename
+  return vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+end
+
 --- Run the after_create hook in the new worktree directory.
 ---@param path string Worktree path
 ---@param branch string Branch name
@@ -87,11 +99,13 @@ local function do_add()
     local cfg = config.get()
     local path
 
+    local rname = repo_name()
+
     if cfg.prompt_for_path then
       -- Synchronous second prompt
       vim.ui.input({
         prompt = "Worktree path: ",
-        default = cfg.path_from_branch(branch),
+        default = cfg.path_from_branch(branch, rname),
       }, function(input_path)
         if not input_path or input_path == "" then
           return
@@ -103,7 +117,7 @@ local function do_add()
         return
       end
     else
-      path = cfg.path_from_branch(branch)
+      path = cfg.path_from_branch(branch, rname)
     end
 
     -- Resolve path relative to the git common dir's parent
@@ -222,7 +236,7 @@ function M.create(branch, path)
   end
 
   local cfg = config.get()
-  path = path or cfg.path_from_branch(branch)
+  path = path or cfg.path_from_branch(branch, repo_name())
 
   -- Resolve relative path
   if not path:match("^/") then

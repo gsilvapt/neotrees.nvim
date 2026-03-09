@@ -68,8 +68,17 @@ local function parse_porcelain(raw)
   local entries = {}
   local current = {}
 
-  for line in raw:gmatch("[^\n]+") do
+  -- Split preserving empty lines. gmatch("[^\n]+") skips blank lines,
+  -- which breaks parsing since empty lines separate worktree entries.
+  local lines = vim.split(raw, "\n", { plain = true })
+
+  for _, line in ipairs(lines) do
     if line:match("^worktree ") then
+      -- Flush any previous entry before starting a new one
+      if current.path then
+        current.bare = current.bare or false
+        table.insert(entries, current)
+      end
       current = { path = line:sub(10) }
     elseif line:match("^HEAD ") then
       current.head = line:sub(6, 12) -- short hash (7 chars)
@@ -83,17 +92,10 @@ local function parse_porcelain(raw)
       current.branch = current.branch or "(bare)"
     elseif line == "detached" then
       current.branch = "(detached)"
-    elseif line == "" then
-      -- Empty line separates entries
-      if current.path then
-        current.bare = current.bare or false
-        table.insert(entries, current)
-      end
-      current = {}
     end
   end
 
-  -- Handle last entry if no trailing newline
+  -- Flush the last entry
   if current.path then
     current.bare = current.bare or false
     table.insert(entries, current)
