@@ -1,6 +1,6 @@
-local config = require("worktree.config")
-local git = require("worktree.git")
-local log = require("worktree.log")
+local config = require("neotrees.config")
+local git = require("neotrees.git")
+local log = require("neotrees.log")
 
 local M = {}
 
@@ -8,7 +8,7 @@ local M = {}
 M._buf = nil
 ---@type integer? Window handle for the floating window
 M._win = nil
----@type WorktreeEntry[] Cached worktree entries displayed in the window
+---@type NeotreesEntry[] Cached worktree entries displayed in the window
 M._entries = {}
 ---@type integer First buffer line (0-indexed) where worktree entries start
 M._entry_offset = 0
@@ -34,7 +34,7 @@ local function window_dimensions()
 end
 
 --- Render the worktree list into the buffer.
----@param entries WorktreeEntry[]
+---@param entries NeotreesEntry[]
 ---@param current_path? string Path of the worktree neovim is currently inside
 local function render(entries, current_path)
   if not M._buf or not vim.api.nvim_buf_is_valid(M._buf) then
@@ -110,7 +110,7 @@ local function render(entries, current_path)
   vim.bo[M._buf].modifiable = false
 
   -- Apply highlights
-  local ns = vim.api.nvim_create_namespace("worktree")
+  local ns = vim.api.nvim_create_namespace("neotrees")
   vim.api.nvim_buf_clear_namespace(M._buf, ns, 0, -1)
 
   for _, hl in ipairs(highlights) do
@@ -126,7 +126,7 @@ local function render(entries, current_path)
 end
 
 --- Get the worktree entry under the cursor.
----@return WorktreeEntry?
+---@return NeotreesEntry?
 local function entry_under_cursor()
   if not M._win or not vim.api.nvim_win_is_valid(M._win) then
     return nil
@@ -210,9 +210,9 @@ local function clamp_cursor()
 end
 
 --- Set up buffer-local keymaps for the floating window.
----@param on_switch fun(entry: WorktreeEntry) Callback when user switches worktree
+---@param on_switch fun(entry: NeotreesEntry) Callback when user switches worktree
 ---@param on_add fun() Callback when user wants to add a worktree
----@param on_delete fun(entry: WorktreeEntry) Callback when user wants to delete a worktree
+---@param on_delete fun(entry: NeotreesEntry) Callback when user wants to delete a worktree
 local function set_keymaps(on_switch, on_add, on_delete)
   local buf = M._buf
   local map_opts = { buffer = buf, nowait = true, silent = true }
@@ -262,9 +262,9 @@ local function set_keymaps(on_switch, on_add, on_delete)
 end
 
 --- Open the floating worktree window.
----@param on_switch fun(entry: WorktreeEntry) Callback when user switches worktree
+---@param on_switch fun(entry: NeotreesEntry) Callback when user switches worktree
 ---@param on_add fun() Callback when user wants to add a worktree
----@param on_delete fun(entry: WorktreeEntry) Callback when user wants to delete a worktree
+---@param on_delete fun(entry: NeotreesEntry) Callback when user wants to delete a worktree
 function M.open(on_switch, on_add, on_delete)
   -- Close existing window if open
   if M._win and vim.api.nvim_win_is_valid(M._win) then
@@ -278,7 +278,7 @@ function M.open(on_switch, on_add, on_delete)
   vim.bo[M._buf].buftype = "nofile"
   vim.bo[M._buf].bufhidden = "wipe"
   vim.bo[M._buf].swapfile = false
-  vim.bo[M._buf].filetype = "worktree"
+  vim.bo[M._buf].filetype = "neotrees"
 
   -- Open floating window
   M._win = vim.api.nvim_open_win(M._buf, true, {

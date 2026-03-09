@@ -1,7 +1,7 @@
-local config = require("worktree.config")
-local git = require("worktree.git")
-local ui = require("worktree.ui")
-local log = require("worktree.log")
+local config = require("neotrees.config")
+local git = require("neotrees.git")
+local ui = require("neotrees.ui")
+local log = require("neotrees.log")
 
 local M = {}
 
@@ -32,7 +32,7 @@ local function run_after_create(path, branch)
     local ok, err = pcall(after, path, branch)
     if not ok then
       log.log("ERROR", "after_create function failed: " .. tostring(err))
-      vim.notify("worktree: after_create hook failed: " .. tostring(err), vim.log.levels.ERROR)
+      vim.notify("neotrees: after_create hook failed: " .. tostring(err), vim.log.levels.ERROR)
     end
     return
   end
@@ -54,7 +54,7 @@ local function run_after_create(path, branch)
 
     if result.code ~= 0 then
       vim.notify(
-        string.format("worktree: after_create command failed: %s\n%s", cmd, result.stderr or ""),
+        string.format("neotrees: after_create command failed: %s\n%s", cmd, result.stderr or ""),
         vim.log.levels.WARN
       )
     end
@@ -62,7 +62,7 @@ local function run_after_create(path, branch)
 end
 
 --- Switch to a worktree: change directory, wipe old buffers, open new root.
----@param entry WorktreeEntry
+---@param entry NeotreesEntry
 local function do_switch(entry)
   local old_path = git.current_worktree_path()
 
@@ -86,7 +86,7 @@ local function do_switch(entry)
   -- Open netrw at new root
   vim.cmd.edit(entry.path)
 
-  vim.notify("worktree: switched to " .. entry.branch, vim.log.levels.INFO)
+  vim.notify("neotrees: switched to " .. entry.branch, vim.log.levels.INFO)
 end
 
 --- Prompt user to create a new worktree.
@@ -130,14 +130,14 @@ local function do_add()
       end
     end
 
-    vim.notify("worktree: creating worktree for branch '" .. branch .. "'...", vim.log.levels.INFO)
+    vim.notify("neotrees: creating worktree for branch '" .. branch .. "'...", vim.log.levels.INFO)
 
     -- Fetch + pull base branch if configured
     if cfg.fetch_before_create then
       log.log("INFO", "Fetching before create (base_branch=" .. cfg.base_branch .. ")")
       local fetch_result = git.fetch()
       if not fetch_result.ok then
-        vim.notify("worktree: fetch failed: " .. fetch_result.stderr, vim.log.levels.WARN)
+        vim.notify("neotrees: fetch failed: " .. fetch_result.stderr, vim.log.levels.WARN)
         -- Continue anyway; the branch might exist locally
       end
     end
@@ -147,11 +147,11 @@ local function do_add()
 
     local result = git.add(path, branch, create_branch)
     if not result.ok then
-      vim.notify("worktree: failed to add worktree: " .. result.stderr, vim.log.levels.ERROR)
+      vim.notify("neotrees: failed to add worktree: " .. result.stderr, vim.log.levels.ERROR)
       return
     end
 
-    vim.notify("worktree: created worktree at " .. path, vim.log.levels.INFO)
+    vim.notify("neotrees: created worktree at " .. path, vim.log.levels.INFO)
 
     -- Run after_create hook
     run_after_create(path, branch)
@@ -162,11 +162,11 @@ local function do_add()
 end
 
 --- Prompt user to confirm and delete a worktree.
----@param entry WorktreeEntry
+---@param entry NeotreesEntry
 local function do_delete(entry)
   local current_path = git.current_worktree_path()
   if current_path and entry.path == current_path then
-    vim.notify("worktree: cannot delete the current worktree (switch first)", vim.log.levels.ERROR)
+    vim.notify("neotrees: cannot delete the current worktree (switch first)", vim.log.levels.ERROR)
     return
   end
 
@@ -174,7 +174,7 @@ local function do_delete(entry)
     prompt = string.format("Delete worktree '%s' at %s? (y/N): ", entry.branch, entry.path),
   }, function(answer)
     if not answer or answer:lower() ~= "y" then
-      vim.notify("worktree: deletion cancelled", vim.log.levels.INFO)
+      vim.notify("neotrees: deletion cancelled", vim.log.levels.INFO)
       return
     end
 
@@ -192,26 +192,26 @@ local function do_delete(entry)
 
         local force_result = git.remove(entry.path, true)
         if not force_result.ok then
-          vim.notify("worktree: force delete failed: " .. force_result.stderr, vim.log.levels.ERROR)
+          vim.notify("neotrees: force delete failed: " .. force_result.stderr, vim.log.levels.ERROR)
           return
         end
 
-        vim.notify("worktree: deleted (forced) " .. entry.path, vim.log.levels.INFO)
+        vim.notify("neotrees: deleted (forced) " .. entry.path, vim.log.levels.INFO)
         ui.refresh()
       end)
       return
     end
 
-    vim.notify("worktree: deleted " .. entry.path, vim.log.levels.INFO)
+    vim.notify("neotrees: deleted " .. entry.path, vim.log.levels.INFO)
     ui.refresh()
   end)
 end
 
 --- Set up the plugin with user options.
----@param opts? table User configuration (see WorktreeConfig)
+---@param opts? table User configuration (see NeotreesConfig)
 function M.setup(opts)
   config.setup(opts)
-  log.log("INFO", "worktree.nvim loaded")
+  log.log("INFO", "neotrees.nvim loaded")
 end
 
 --- Open the worktree manager floating window.
@@ -231,7 +231,7 @@ end
 ---@param path? string Filesystem path (auto-derived if nil)
 function M.create(branch, path)
   if not branch or branch == "" then
-    vim.notify("worktree: branch name is required", vim.log.levels.ERROR)
+    vim.notify("neotrees: branch name is required", vim.log.levels.ERROR)
     return
   end
 
@@ -254,11 +254,11 @@ function M.create(branch, path)
   local create_branch = not git.branch_exists(branch) and not git.remote_branch_exists(branch)
   local result = git.add(path, branch, create_branch)
   if not result.ok then
-    vim.notify("worktree: failed to add worktree: " .. result.stderr, vim.log.levels.ERROR)
+    vim.notify("neotrees: failed to add worktree: " .. result.stderr, vim.log.levels.ERROR)
     return
   end
 
-  vim.notify("worktree: created worktree at " .. path, vim.log.levels.INFO)
+  vim.notify("neotrees: created worktree at " .. path, vim.log.levels.INFO)
   run_after_create(path, branch)
 end
 
@@ -266,24 +266,24 @@ end
 ---@param path string Worktree path
 function M.delete(path)
   if not path or path == "" then
-    vim.notify("worktree: path is required", vim.log.levels.ERROR)
+    vim.notify("neotrees: path is required", vim.log.levels.ERROR)
     return
   end
 
   local result = git.remove(path, false)
   if not result.ok then
-    vim.notify("worktree: failed to delete: " .. result.stderr, vim.log.levels.ERROR)
+    vim.notify("neotrees: failed to delete: " .. result.stderr, vim.log.levels.ERROR)
     return
   end
 
-  vim.notify("worktree: deleted " .. path, vim.log.levels.INFO)
+  vim.notify("neotrees: deleted " .. path, vim.log.levels.INFO)
 end
 
 --- Programmatic API: switch to a worktree by path.
 ---@param path string Worktree path
 function M.switch(path)
   if not path or path == "" then
-    vim.notify("worktree: path is required", vim.log.levels.ERROR)
+    vim.notify("neotrees: path is required", vim.log.levels.ERROR)
     return
   end
 
@@ -291,7 +291,7 @@ function M.switch(path)
 end
 
 --- Programmatic API: list all worktrees.
----@return WorktreeEntry[]
+---@return NeotreesEntry[]
 function M.list()
   return git.list()
 end
