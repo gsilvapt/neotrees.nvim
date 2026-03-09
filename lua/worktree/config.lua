@@ -4,7 +4,7 @@
 ---@field border string Border style for the floating window
 
 ---@class WorktreeConfig
----@field path_from_branch fun(branch: string): string Derive worktree path from branch name
+---@field path_from_branch fun(branch: string, repo_name: string): string Derive worktree path from branch name
 ---@field after_create? string|string[]|fun(path: string, branch: string) Commands to run after worktree creation
 ---@field fetch_before_create boolean Whether to fetch+pull before creating a worktree
 ---@field base_branch string Base branch to fetch/pull from before creation
@@ -16,10 +16,10 @@ local M = {}
 
 ---@type WorktreeConfig
 local defaults = {
-  path_from_branch = function(branch)
-    -- "feature/foo" -> "foo", "fix/bar-baz" -> "bar-baz"
+  path_from_branch = function(branch, repo_name)
+    -- "feature/foo" with repo "worktrees.nvim" -> "../worktrees.nvim-foo"
     local name = branch:match("[^/]+$") or branch
-    return "../" .. name
+    return "../" .. repo_name .. "-" .. name
   end,
 
   after_create = nil,
