@@ -79,11 +79,13 @@ local function render(entries, current_path)
         -- Fetch status for non-bare entries
         local status = git.status(entry.path)
 
+        local branch_padded = branch .. string.rep(" ", max_branch - #branch)
+        local path_padded = path .. string.rep(" ", max_path - #path)
         local line = string.format(
-          " %s%-" .. max_branch .. "s  %-" .. max_path .. "s  [%s] %s",
+          " %s%s  %s  [%s] %s",
           marker,
-          branch,
-          path,
+          branch_padded,
+          path_padded,
           head,
           status
         )
